@@ -28,11 +28,19 @@
 #' @export
 #' @family garch tidiers
 #' @seealso [tidy()], [tseries::garch()]
-tidy.garch <- function(x, ...) {
+tidy.garch <- function(x, conf.int = FALSE, ...) {
   s <- summary(x)
   co <- s$coef
   nn <- c("estimate", "std.error", "statistic", "p.value")
   ret <- fix_data_frame(co, nn[1:ncol(co)])
+  
+  if (conf.int) {
+    ci <- confint(x) # 1st col is 2.5% LB, 2nd is 97.5% UB
+    ret <- mutate(ret, 
+                  .conf.int.025 = ci[,1],
+                  .conf.int.975 = ci[,2])
+  }
+  
   as_tibble(ret)
 }
 
